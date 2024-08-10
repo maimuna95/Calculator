@@ -1,9 +1,6 @@
-package Client;
-
 import java.rmi.Naming;
+import java.util.List;
 import java.util.Scanner;
-
-import Server.Calculator;
 
 public class CalculatorClient {
     public static void main(String[] args) {
@@ -13,13 +10,19 @@ public class CalculatorClient {
 
             Scanner scanner = new Scanner(System.in);
 
+            // Register the client with a unique identifier
+            System.out.print("Enter your client ID: ");
+            String clientId = scanner.nextLine();
+            calculator.registerClient(clientId);
+
             while (true) {
                 System.out.println("1. Push Value");
                 System.out.println("2. Push Operation");
                 System.out.println("3. Pop Value");
                 System.out.println("4. Check if Stack is Empty");
                 System.out.println("5. Delay Pop");
-                System.out.println("6. Exit");
+                System.out.println("6. Show Stack");
+                System.out.println("7. Exit");
                 System.out.print("Choose an option: ");
                 int choice = scanner.nextInt();
 
@@ -27,29 +30,33 @@ public class CalculatorClient {
                     case 1:
                         System.out.print("Enter value to push: ");
                         int value = scanner.nextInt();
-                        calculator.pushValue(value);
+                        calculator.pushValue(clientId, value);
                         break;
                     case 2:
                         System.out.print("Enter operation (min, max, lcm, gcd): ");
                         String operation = scanner.next();
-                        calculator.pushOperation(operation);
+                        calculator.pushOperation(clientId, operation);
 
                         // Immediately pop and display the result after an operation
-                        int result = calculator.pop();
+                        int result = calculator.pop(clientId);
                         System.out.println("Result after operation '" + operation + "': " + result);
                         break;
                     case 3:
-                        System.out.println("Popped value: " + calculator.pop());
+                        System.out.println("Popped value: " + calculator.pop(clientId));
                         break;
                     case 4:
-                        System.out.println("Is stack empty? " + calculator.isEmpty());
+                        System.out.println("Is stack empty? " + calculator.isEmpty(clientId));
                         break;
                     case 5:
                         System.out.print("Enter delay in milliseconds: ");
                         int millis = scanner.nextInt();
-                        System.out.println("Delayed pop value: " + calculator.delayPop(millis));
+                        System.out.println("Delayed pop value: " + calculator.delayPop(clientId, millis));
                         break;
                     case 6:
+                        List<Integer> stackContents = calculator.getStack(clientId);
+                        System.out.println("Current stack: " + stackContents);
+                        break;
+                    case 7:
                         System.out.println("Exiting...");
                         scanner.close();
                         return;

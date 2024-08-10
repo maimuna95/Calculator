@@ -1,79 +1,102 @@
-package Server;
-
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
 
 public class CalculatorImplementation extends UnicastRemoteObject implements Calculator {
-    private Stack<Integer> stack;
+    private Map<String, Stack<Integer>> clientStacks;
 
     protected CalculatorImplementation() throws RemoteException {
-        stack = new Stack<>();
+        clientStacks = new HashMap<>();
     }
 
     @Override
-    public synchronized void pushValue(int val) throws RemoteException {
-        stack.push(val);
-    }
-
-    @Override
-    public synchronized void pushOperation(String operator) throws RemoteException {
-        if (stack.isEmpty()) {
-            throw new RemoteException("Stack is empty, cannot perform operation.");
+    public synchronized void registerClient(String clientId) throws RemoteException {
+        if (!clientStacks.containsKey(clientId)) {
+            clientStacks.put(clientId, new Stack<>());
         }
-        
-        int result;
+    }
+
+    @Override
+    public synchronized void pushValue(String clientId, int val) throws RemoteException {
+        Stack<Integer> stack = clientStacks.get(clientId);
+        if (stack != null) {
+            stack.push(val);
+        }
+    }
+
+    @Override
+    public synchronized void pushOperation(String clientId, String operator) throws RemoteException {
+        Stack<Integer> stack = clientStacks.get(clientId);
+        if (stack == null || stack.isEmpty()) return;
+
+        int result = stack.pop();
+
         switch (operator) {
             case "min":
-                result = stack.stream().min(Integer::compare).get();
+                while (!stack.isEmpty()) {
+                    result = Math.min(result, stack.pop());
+                }
                 break;
             case "max":
-                result = stack.stream().max(Integer::compare).get();
+                while (!stack.isEmpty()) {
+                    result = Math.max(result, stack.pop());
+                }
                 break;
             case "lcm":
-                result = lcm(stack);
+                while (!stack.isEmpty()) {
+                    result = lcm(result, stack.pop());
+                }
                 break;
             case "gcd":
-                result = gcd(stack);
+                while (!stack.isEmpty()) {
+                    result = gcd(result, stack.pop());
+                }
                 break;
             default:
-                throw new RemoteException("Unknown operator.");
+                throw new IllegalArgumentException("Unsupported operator: " + operator);
         }
-        stack.clear();
+
         stack.push(result);
     }
 
     @Override
-    public synchronized int pop() throws RemoteException {
-        if (stack.isEmpty()) {
-            throw new RemoteException("Stack is empty.");
+    public synchronized int pop(String clientId) throws RemoteException {
+        Stack<Integer> stack = clientStacks.get(clientId);
+        if (stack != null && !stack.isEmpty()) {
+            return stack.pop();
+        } else {
+            throw new RemoteException("Stack is empty or client not registered!");
         }
-        return stack.pop();
     }
 
     @Override
-    public synchronized boolean isEmpty() throws RemoteException {
-        return stack.isEmpty();
+    public synchronized boolean isEmpty(String clientId) throws RemoteException {
+        Stack<Integer> stack = clientStacks.get(clientId);
+        return stack == null || stack.isEmpty();
     }
 
     @Override
-    public int delayPop(int millis) throws RemoteException {
+    public synchronized int delayPop(String clientId, int millis) throws RemoteException {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw new RemoteException("Thread interrupted during delay", e);
         }
-        return pop();
+        return pop(clientId);
     }
 
-    private int gcd(Stack<Integer> stack) {
-        int result = stack.pop();
-        while (!stack.isEmpty()) {
-            result = gcd(result, stack.pop());
-        }
-        return result;
+    @Override
+    public synchronized List<Integer> getStack(String clientId) throws RemoteException {
+        Stack<Integer> stack = clientStacks.get(clientId);
+        return stack != null ? new ArrayList<>(stack) : new ArrayList<>();
     }
 
+    // Helper methods for LCM and GCD
     private int gcd(int a, int b) {
         while (b != 0) {
             int temp = b;
@@ -81,14 +104,6 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
             a = temp;
         }
         return a;
-    }
-
-    private int lcm(Stack<Integer> stack) {
-        int result = stack.pop();
-        while (!stack.isEmpty()) {
-            result = lcm(result, stack.pop());
-        }
-        return result;
     }
 
     private int lcm(int a, int b) {
