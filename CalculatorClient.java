@@ -28,44 +28,44 @@ public class CalculatorClient {
 
                 switch (choice) {
                     case 1:
-                        System.out.print("Enter value to push: ");
+                        System.out.print("\nEnter value to push: ");
                         int value = scanner.nextInt();
                         calculator.pushValue(clientId, value);
                         break;
                     case 2:
-                        System.out.print("Enter operation (min, max, lcm, gcd): ");
+                        System.out.print("\nEnter operation (min, max, lcm, gcd): ");
                         String operation = scanner.next();
                         calculator.pushOperation(clientId, operation);
 
                         // Immediately pop and display the result after an operation
                         int result = calculator.pop(clientId);
-                        System.out.println("Result after operation '" + operation + "': " + result);
+                        System.out.println("\nResult after operation '" + operation + "': " + result + "\n");
                         break;
                     case 3:
-                        System.out.println("Popped value: " + calculator.pop(clientId));
+                        System.out.println("\nPopped value: " + calculator.pop(clientId) + "\n");
                         break;
                     case 4:
-                        System.out.println("Is stack empty? " + calculator.isEmpty(clientId));
+                        System.out.println("\nIs stack empty? " + calculator.isEmpty(clientId) + "\n");
                         break;
                     case 5:
-                        System.out.print("Enter delay in milliseconds: ");
+                        System.out.print("\nEnter delay in milliseconds: ");
                         int millis = scanner.nextInt();
-                        System.out.println("Delayed pop value: " + calculator.delayPop(clientId, millis));
+                        System.out.println("\nDelayed pop value: " + calculator.delayPop(clientId, millis) + "\n");
                         break;
                     case 6:
                         List<Integer> stackContents = calculator.getStack(clientId);
-                        System.out.println("Current stack: " + stackContents);
+                        System.out.println("\nCurrent stack: " + stackContents + "\n");
                         break;
                     case 7:
-                        System.out.println("Exiting...");
+                        System.out.println("\nExiting...\n");
                         scanner.close();
                         return;
                     default:
-                        System.out.println("Invalid option, try again.");
+                        System.out.println("\nInvalid option, try again.\n");
                 }
             }
         } catch (Exception e) {
-            System.err.println("Calculator Client exception: " + e.toString());
+            System.err.println("Calculator Client exception: " + e.toString() + "\n");
             e.printStackTrace();
         }
     }
