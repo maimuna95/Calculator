@@ -31,11 +31,13 @@ public class CalculatorClient {
                         System.out.print("\nEnter value to push: ");
                         int value = scanner.nextInt();
                         calculator.pushValue(clientId, value);
+                        System.out.print("Successfully Pushed the value.");
                         break;
                     case 2:
                         System.out.print("\nEnter operation (min, max, lcm, gcd): ");
                         String operation = scanner.next();
                         calculator.pushOperation(clientId, operation);
+                        System.out.print(operation + "Choosed!");
 
                         // Immediately pop and display the result after an operation
                         int result = calculator.pop(clientId);
@@ -43,6 +45,8 @@ public class CalculatorClient {
                         break;
                     case 3:
                         System.out.println("\nPopped value: " + calculator.pop(clientId) + "\n");
+                        System.out.print("Successfully Poped the value");
+                        
                         break;
                     case 4:
                         System.out.println("\nIs stack empty? " + calculator.isEmpty(clientId) + "\n");
