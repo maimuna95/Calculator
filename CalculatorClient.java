@@ -16,7 +16,7 @@ public class CalculatorClient {
             calculator.registerClient(clientId);
 
             while (true) {
-                System.out.println("1. Push Value");
+                System.out.println("\n \n1. Push Value");
                 System.out.println("2. Push Operation");
                 System.out.println("3. Pop Value");
                 System.out.println("4. Check if Stack is Empty");
